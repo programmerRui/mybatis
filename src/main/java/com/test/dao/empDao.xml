@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.test.dao.empDao">
+    <cache />
+    <resultMap id="abc" type="emp">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="sex" column="sex"/>
+        <result property="deptno" column="deptno"/>
+        <result property="hiredate" column="hiredate"/>
+        <association property="deptname" javaType="dept">
+            <id property="deptid" column="deptid"/>
+            <result property="deptname" column="deptname"/>
+        </association>
+    </resultMap>
+    <insert id="insert_employee" parameterType="com.test.dao.empDao">
+        insert into emp values(NULL,#{name},#{sex},#{deptno},#{hiredate})
+    </insert>
+    <delete id="delete_employeeID">
+        delete from emp where id=#{id}
+    </delete>
+    <delete id="deleteMap" parameterType="com.test.dao.empDao">
+        delete from emp where id in
+        <foreach collection="ids" open="(" separator="," close=")" item="id">
+            #{id}
+        </foreach>
+        and deptno=#{deptno}
+    </delete>
+    <delete id="deleteList" parameterType="com.test.dao.empDao">
+        delete from emp where id in
+        <foreach collection="list" open="(" separator="," close=")" item="id">
+            #{id}
+        </foreach>
+    </delete>
+    <update id="update_employee">
+        update emp set name=#{name},sex=#{sex},deptno=#{deptno},hiredate=#{hiredate} where id=#{id}
+    </update>
+    <update id="update_emp">
+        update emp
+        <set>
+            <if test="name!=null">
+                name=#{name},
+            </if>
+            <if test="sex !=null">
+                sex=#{sex},
+            </if>
+            <if test="deptno!=0">
+                deptno=#{deptno}
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+    <select id="queryAll" resultMap="abc">
+        select e.*,d.* from emp e,dept d where e.deptno=d.deptid
+    </select>
+    <select id="queryById" resultMap="abc" parameterType="int">
+        select e.*,d.* from emp e,dept d where e.deptno=d.deptid and id=#{id}
+    </select>
+
+    <select id="queryBy" resultMap="abc" parameterType="com.test.dao.empDao">
+        select * from emp
+        <where>
+            <if test="name!=null">
+                name like CONCAT('%',#{name},'%')
+            </if>
+            <if test="sex!=null">
+                and sex=#{sex}
+            </if>
+            <if test="id!=0">
+                and id=#{id}
+            </if>
+        </where>
+    </select>
+
+</mapper>
